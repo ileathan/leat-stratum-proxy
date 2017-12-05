@@ -13,7 +13,9 @@ So you can do `proxy.on('accepted', data => console.log(data.cookie))`
 
 3.) I minimally optimized things but removing some transpilation bloat and for looping versus function calls.
 
-4.) I moved all the files into one, and then minified it for convenience.
+4.) I added an uptime command (it use to be there).
+
+5.) I moved all the files into one, and then minified it for convenience.
 
 
 # Usage

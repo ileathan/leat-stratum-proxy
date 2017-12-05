@@ -13,7 +13,7 @@ const defaults = {
   cookie: 'loginCookie'
 };
 
-
+const uptime = Date.now();
 const EventEmitter = require("events");
 const WebSocket = require("ws");
 const url = require("url");
@@ -553,6 +553,7 @@ Miner.prototype.handleMessage = function (message) {
     }
 };
 
+G_UP_TIME = Date.now()
 function Proxy(constructorOptions) {
     EventEmitter.call(this);
     if (constructorOptions === void 0) { constructorOptions = defaults; }
@@ -739,6 +740,7 @@ Proxy.prototype.isEmpty = function (connection) {
 };
 Proxy.prototype.getStats = function () {
     var _this = this;
+    const UP_TIME = Date.now() - G_UP_TIME;
     return Object.keys(this.connections).reduce(function (stats, key) { return ({
         miners: stats.miners.concat(_this.connections[key].reduce(function (miners, connection) { return miners.concat(connection.miners.map(function (miner) { return ({
             id: miner.id,
@@ -750,7 +752,8 @@ Proxy.prototype.getStats = function () {
             host: connection.host,
             port: connection.port,
             miners: connection.miners.length
-        }); }))
+        }); })),
+        uptime: UP_TIME
     }); }, {
         miners: [],
         connections: []
