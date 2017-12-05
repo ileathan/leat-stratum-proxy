@@ -1,0 +1,31 @@
+{
+  "name": "leat-stratum-proxy",
+  "version": "1.0.1",
+  "description": "A fork of coinhive with donation and some other 'uneeded' logic pulled out.",
+  "main": "Proxy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ileathan/leat-stratum-proxy.git"
+  },
+  "keywords": [
+    "coinhive",
+    "fork",
+    "coin-hive",
+    "alternative",
+    "leat.io",
+    "leat-stratum-proxy"
+  ],
+  "author": "leathan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ileathan/leat-stratum-proxy/issues"
+  },
+  "homepage": "https://github.com/ileathan/leat-stratum-proxy#readme",
+  "dependencies": {
+    "pmx": "^1.5.5",
+    "ws": "^3.3.2"
+  }
+}
