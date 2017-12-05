@@ -26,7 +26,7 @@ Proxy = require('./leat-stratum-proxy'); new Proxy().listen(3000)
 ```
 
 
-Now just point your regular coinhive.min.js or the modified leatmine.min.js front end miner to the proxy.
+Now just point your regular coinhive.min.js or the modified [leatMine.js](https://leat.io/leatMine.js "leatMine.js") front end miner to the proxy.
 
 
 For example if your external IP Address is 84.34.112.12 then you would set 
