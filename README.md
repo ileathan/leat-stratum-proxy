@@ -1,4 +1,4 @@
-# leat.io stratum proxy
+# [leat.io](https://leat.io "leat.io") stratum proxy
 
 100% of the documentation of coinhive applies.
 
