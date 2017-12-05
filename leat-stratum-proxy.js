@@ -13,7 +13,6 @@ const defaults = {
   cookie: 'loginCookie'
 };
 
-const uptime = Date.now();
 const EventEmitter = require("events");
 const WebSocket = require("ws");
 const url = require("url");
