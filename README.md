@@ -15,7 +15,9 @@ So you can do `proxy.on('accepted', data => console.log(data.cookie))`
 
 4.) I added an uptime command (it use to be there).
 
-5.) I moved all the files into one, and then minified it for convenience.
+5.) I linked the console.log's with `process.env.DEBUG`
+
+6.) I moved all the files into one, and then minified it for convenience.
 
 
 # Usage
