@@ -7,7 +7,7 @@ Changes I made:
 1.) Added a configuration option 'cookie' that when set, emits the clients cookie with the data object.
 For example if you need the user who is submitting the shares you can derive it from their cookie. (since the user flag is not verified).
 
-So you can do `proxy.on('accepted', data => console.log(data.cookie))`
+So you can do `proxy.on('accepted', data => console.log(data.cookie))` _See example bellow_
 
 2.) I removed 100% of the donation logic and parameters from the code.
 
@@ -26,10 +26,11 @@ So you can do `proxy.on('accepted', data => console.log(data.cookie))`
 Proxy = require('leat-stratum-proxy.js');
 
 proxy = new Proxy({
-  host: "pool.supportxmr.com",
+  host: 'pool.supportxmr.com',
   port: 3333,
-  key: fs.readFileSync("./privkey.pem"),
-  cert: fs.readFileSync("./cert.pem")
+  key: fs.readFileSync('./privkey.pem'),
+  cert: fs.readFileSync('./cert.pem'),
+  cookie: 'loginCookie' // So your callback gets data.cookie="1234" if the request headers contained loginCookie=1234.
 });
 
 proxy.listen(3000);
