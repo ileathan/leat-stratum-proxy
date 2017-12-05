@@ -1,4 +1,4 @@
-# leatMine stratum proxy
+# leat.io stratum proxy
 
 100% of the documentation of coinhive applies.
 
