@@ -17,7 +17,7 @@ So you can do `proxy.on('accepted', data => console.log(data.cookie))`
 
 5.) I linked the console.log's with `process.env.DEBUG`
 
-6.) I moved all the files into one, and then minified it for convenience.
+6.) I moved all the files into one, ts->js.
 
 
 # Usage
