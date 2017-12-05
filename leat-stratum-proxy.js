@@ -684,7 +684,7 @@ Proxy.prototype.listen = function (port, host, callback) {
         miner.on("found", function (data) { return _this.emit("found", _(data)); });
         miner.on("accepted", function (data) { return _this.emit("accepted", _(data)); });
         miner.on("close", function (data) { return _this.emit("close", _(data)); });
-        miner.on("error", function (data) { return _this.emit("error", _(data); });
+        miner.on("error", function (data) { return _this.emit("error", _(data)); });
         miner.connect();
     });
     if (!host && !callback) {
