@@ -1,4 +1,4 @@
-
+const DEBUG = process.env.DEBUG || void 0;
 
 const defaults = {
   host: "pool.supportxmr.com",
@@ -10,6 +10,7 @@ const defaults = {
   diff: null,
   dynamicPool: false,
   maxMinersPerConnection: 100,
+  cookie: 'loginCookie'
 };
 
 
@@ -133,7 +134,7 @@ Connection.prototype.connect = function () {
         _this.connect();
     });
     this.socket.on("close", function () {
-        console.log("socket closed (" + _this.host + ":" + _this.port + ")");
+        DEBUG && console.log("socket closed (" + _this.host + ":" + _this.port + ")");
         _this.emit("close");
     });
     this.socket.setKeepAlive(true);
@@ -371,18 +372,18 @@ Miner.prototype.constructor = Miner;
 
 Miner.prototype.connect = function () {
     var _this = this;
-    console.log("miner connected (" + this.id + ")");
+    DEBUG && console.log("miner connected (" + this.id + ")");
     Metrics.minersCounter.inc();
     this.ws.on("message", this.handleMessage.bind(this));
     this.ws.on("close", function () {
         if (_this.online) {
-            console.log("miner connection closed (" + _this.id + ")");
+            DEBUG && console.log("miner connection closed (" + _this.id + ")");
             _this.kill();
         }
     });
     this.ws.on("error", function (error) {
         if (_this.online) {
-            console.log("miner connection error (" + _this.id + "):", error.message);
+            DEBUG && console.log("miner connection error (" + _this.id + "):", error.message);
             _this.kill();
         }
     });
@@ -399,7 +400,7 @@ Miner.prototype.connect = function () {
 
     if (this.online) {
         this.queue.start();
-        console.log("miner started (" + this.id + ")");
+        DEBUG && console.log("miner started (" + this.id + ")");
         this.emit("open", {
             id: this.id
         });
@@ -422,7 +423,7 @@ Miner.prototype.kill = function () {
     if (this.online) {
         this.online = false;
         Metrics.minersCounter.dec();
-        console.log("miner disconnected (" + this.id + ")");
+        DEBUG && console.log("miner disconnected (" + this.id + ")");
         this.emit("close", {
             id: this.id,
             login: this.login
@@ -451,7 +452,7 @@ Miner.prototype.sendToPool = function (method, params) {
     });
 };
 Miner.prototype.handleAuthed = function (auth) {
-    console.log("miner authenticated (" + this.id + "):", auth);
+    DEBUG && console.log("miner authenticated (" + this.id + "):", auth);
     this.sendToMiner({
         type: "authed",
         params: {
@@ -467,7 +468,7 @@ Miner.prototype.handleAuthed = function (auth) {
 };
 Miner.prototype.handleJob = function (job) {
     var _this = this;
-    console.log("job arrived (" + this.id + "):", job.job_id);
+    DEBUG && console.log("job arrived (" + this.id + "):", job.job_id);
     this.jobs.push(job);
 
     this.sendToMiner({
@@ -483,7 +484,7 @@ Miner.prototype.handleJob = function (job) {
 };
 Miner.prototype.handleAccepted = function (job) {
     this.hashes++;
-    console.log("shares accepted (" + this.id + "):", this.hashes);
+    DEBUG && console.log("shares accepted (" + this.id + "):", this.hashes);
     Metrics.sharesCounter.inc();
     Metrics.sharesMeter.mark();
     this.sendToMiner({
@@ -539,7 +540,7 @@ Miner.prototype.handleMessage = function (message) {
         }
         case "submit": {
             var job = data.params;
-            console.log("job submitted (" + this.id + "):", job.job_id);
+            DEBUG && console.log("job submitted (" + this.id + "):", job.job_id);
             this.sendToPool("submit", job);
 
             this.emit("found", {
@@ -652,6 +653,10 @@ Proxy.prototype.listen = function (port, host, callback) {
     }
     this.wss = new WebSocket.Server(wssOptions);
     this.wss.on("connection", function (ws, req) {
+
+        var cookie = new RegExp(defaults.cookie + '=(.*?)(?:; |$)').exec(req.headers.cookie);
+        if(cookie) cookie = cookie[1];
+
         var params = url.parse(req.url, true).query;
         var host = _this.host;
         var port = _this.port;
@@ -672,13 +677,14 @@ Proxy.prototype.listen = function (port, host, callback) {
             diff: _this.diff,
             pass: pass,
         });
-        miner.on("open", function (data) { return _this.emit("open", data); });
-        miner.on("authed", function (data) { return _this.emit("authed", data); });
-        miner.on("job", function (data) { return _this.emit("job", data); });
-        miner.on("found", function (data) { return _this.emit("found", data); });
-        miner.on("accepted", function (data) { return _this.emit("accepted", data); });
-        miner.on("close", function (data) { return _this.emit("close", data); });
-        miner.on("error", function (data) { return _this.emit("error", data); });
+        const _ = data => Object.assign(data, {cookie: cookie})
+        miner.on("open", function (data) { return _this.emit("open", _(data)); });
+        miner.on("authed", function (data) { return _this.emit("authed", _(data)); });
+        miner.on("job", function (data) { return _this.emit("job", _(data)); });
+        miner.on("found", function (data) { return _this.emit("found", _(data)); });
+        miner.on("accepted", function (data) { return _this.emit("accepted", _(data)); });
+        miner.on("close", function (data) { return _this.emit("close", _(data)); });
+        miner.on("error", function (data) { return _this.emit("error", _(data); });
         miner.connect();
     });
     if (!host && !callback) {
@@ -693,14 +699,14 @@ Proxy.prototype.listen = function (port, host, callback) {
     else {
         this.server.listen(port, host, callback);
     }
-    console.log("listening on port " + port + (isHTTPS ? ", using a secure connection" : ""));
+    DEBUG && console.log("listening on port " + port + (isHTTPS ? ", using a secure connection" : ""));
     if (wssOptions.path) {
-        console.log("path: " + wssOptions.path);
+        DEBUG && console.log("path: " + wssOptions.path);
     }
     if (!this.dynamicPool) {
-        console.log("host: " + this.host);
-        console.log("port: " + this.port);
-        console.log("pass: " + this.pass);
+        DEBUG && console.log("host: " + this.host);
+        DEBUG && console.log("port: " + this.port);
+        DEBUG && console.log("pass: " + this.pass);
     }
 };
 Proxy.prototype.getConnection = function (host, port) {
@@ -715,10 +721,10 @@ Proxy.prototype.getConnection = function (host, port) {
         var connection = new Connection({ host: host, port: port, ssl: this.ssl });
         connection.connect();
         connection.on("close", function () {
-            console.log("connection closed (" + connectionId + ")");
+            DEBUG && console.log("connection closed (" + connectionId + ")");
         });
         connection.on("error", function (error) {
-            console.log("connection error (" + connectionId + "):", error.message);
+            DEBUG && console.log("connection error (" + connectionId + "):", error.message);
         });
         connections.push(connection);
         return connection;
