@@ -5,7 +5,7 @@
 Changes I made:
 
 1.) Added a configuration option 'cookie' that when set, emits the clients cookie with the data object.
-For example if you need to user who is submitting the shares you can derive it from their cookie.
+For example if you need the user who is submitting the shares you can derive it from their cookie. (since the user flag is not verified).
 
 So you can do `proxy.on('accepted', data => console.log(data.cookie))`
 
