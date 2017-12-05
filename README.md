@@ -11,7 +11,7 @@ So you can do `proxy.on('accepted', data => console.log(data.cookie))` _See exam
 
 2.) I removed 100% of the donation logic and parameters from the code.
 
-3.) I minimally optimized things but removing some transpilation bloat and for looping versus function calls.
+3.) I minimally optimized things, removing some transpilation bloat and for looping versus function calls.
 
 4.) I added an uptime command (it use to be there).
 
