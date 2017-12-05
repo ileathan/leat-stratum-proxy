@@ -1,4 +1,6 @@
-100% of the documentation of conhive applies.
+# leatMine stratum proxy
+
+100% of the documentation of coinhive applies.
 
 The changes I made are mostly just ripping out the donation logic.
 
