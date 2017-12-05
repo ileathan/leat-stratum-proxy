@@ -34,7 +34,7 @@ proxy.listen(3000);
 
 Or even just 
 
-````
+```
 Proxy = require('./leat-stratum-proxy'); new Proxy().listen(3000)
 ```
 
