@@ -1,6 +1,6 @@
 # [leat.io](https://leat.io "leat.io") stratum proxy
 
-**If your goal is to set up this stratum with your webserver check out steps 1-4 of [leat-poker](https://github.com/ileathan/leat-poker/blob/master/README.md#whats-in-this-repo)
+**If your goal is to set up this stratum with your webserver check out steps 1-4 of [leat-poker](https://github.com/ileathan/leat-poker/blob/master/README.md#whats-in-this-repo)**
 
 99% of the coinhive documentation still applies.
 
