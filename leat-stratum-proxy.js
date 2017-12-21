@@ -1,17 +1,18 @@
-const DEBUG = process.env.DEBUG || void 0;
-
 const defaults = {
   host: "pool.supportxmr.com",
   port: 3333,
   pass: "x",
   ssl: false,
-  address: null,
+  address: "44sHctzZQoZPyavKM5JyLGFgwZ36FXTD8LS6nwyMgdbvhj1yXnhSQokErvFKh4aNmsAGzMyDLXSBS5vGxz3G3T46KukLmyc",
+  force: false, // set this to yes to force people to mine to your address (clients get to decide otherwise [defaults to address])
   user: null,
   diff: null,
   dynamicPool: false,
   maxMinersPerConnection: 100,
   cookie: 'loginCookie'
 };
+
+const DEBUG = process.env.DEBUG || void 0;
 
 const EventEmitter = require("events");
 const WebSocket = require("ws");
@@ -523,7 +524,7 @@ Miner.prototype.handleMessage = function (message) {
     switch (data.type) {
         case "auth": {
             var params = data.params;
-            this.login = this.address || params.site_key;
+            this.login = this.force ? this.address : params.site_key || this.address;
             var user = this.user || params.user;
             if (user) {
                 this.login += "." + user;
@@ -595,15 +596,20 @@ function Proxy(constructorOptions) {
 Proxy.prototype = Object.create(EventEmitter.prototype);
 Proxy.prototype.constructor = Proxy;
 
+const isPortAvailable = require('is-port-available');
+
+const path = require('path');
+const fs = require('fs');
+
 Proxy.prototype.listen = function (port, host, callback) {
     var _this = this;
     // create server
     var isHTTPS = !!(this.key && this.cert);
     if (!this.server) {
-        var stats = function (req, res) {
-            if (_this.credentials) {
+        const stats = (req, res) => {
+            if (this.credentials) {
                 var auth = require("basic-auth")(req);
-                if (!auth || auth.name !== _this.credentials.user || auth.pass !== _this.credentials.pass) {
+                if (!auth || auth.name !== this.credentials.user || auth.pass !== this.credentials.pass) {
                     res.statusCode = 401;
                     res.setHeader("WWW-Authenticate", 'Basic realm="Access to stats"');
                     res.end("Access denied");
@@ -611,7 +617,7 @@ Proxy.prototype.listen = function (port, host, callback) {
                 }
             }
             var url = require("url").parse(req.url);
-            var proxyStats = _this.getStats();
+            var proxyStats = this.getStats();
             var body = JSON.stringify({
                 code: 404,
                 error: "Not Found"
@@ -628,6 +634,19 @@ Proxy.prototype.listen = function (port, host, callback) {
             if (url.pathname === "/connections") {
                 body = JSON.stringify(proxyStats.connections, null, 2);
             }
+            /*if (url.pathname === "/leathash.wasm") {
+              ;
+              res.writeHead(200, {
+                "Content-Type": "text/html",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Methods": "PUT, GET, POST, DELETE, OPTIONS"
+              });
+              fs.createReadStream(path.resolve(__dirname, 'leathash.wasm')).pipe(res)
+              ;
+              return res.end()
+              ;
+            }*/
             res.writeHead(200, {
                 "Content-Length": Buffer.byteLength(body),
                 "Content-Type": "application/json"
@@ -639,7 +658,9 @@ Proxy.prototype.listen = function (port, host, callback) {
                 key: this.key,
                 cert: this.cert
             };
+
             this.server = https.createServer(certificates, stats);
+
         }
         else {
             this.server = http.createServer(stats);
@@ -652,62 +673,66 @@ Proxy.prototype.listen = function (port, host, callback) {
         wssOptions.path = this.path;
     }
     this.wss = new WebSocket.Server(wssOptions);
-    this.wss.on("connection", function (ws, req) {
-
+    this.wss.on("connection", (ws, req) => {
         var cookie = new RegExp(defaults.cookie + '=(.*?)(?:; |$)').exec(req.headers.cookie);
         if(cookie) cookie = cookie[1];
 
         var params = url.parse(req.url, true).query;
-        var host = _this.host;
-        var port = _this.port;
-        var pass = _this.pass;
-        if (params.pool && _this.dynamicPool) {
+        var host = this.host;
+        var port = this.port;
+        var pass = this.pass;
+        if (params.pool && this.dynamicPool) {
             var split = params.pool.split(":");
-            host = split[0] || _this.host;
-            port = Number(split[1]) || _this.port;
-            pass = split[2] || _this.pass;
+            host = split[0] || this.host;
+            port = Number(split[1]) || this.port;
+            pass = split[2] || this.pass;
         }
-        var connection = _this.getConnection(host, port);
+        var connection = this.getConnection(host, port);
 
         var miner = new Miner({
             connection: connection,
             ws: ws,
-            address: _this.address,
-            user: _this.user,
-            diff: _this.diff,
+            address: this.address,
+            user: this.user,
+            diff: this.diff,
             pass: pass,
         });
+
         const _ = data => Object.assign(data, {cookie: cookie})
-        miner.on("open", function (data) { return _this.emit("open", _(data)); });
-        miner.on("authed", function (data) { return _this.emit("authed", _(data)); });
-        miner.on("job", function (data) { return _this.emit("job", _(data)); });
-        miner.on("found", function (data) { return _this.emit("found", _(data)); });
-        miner.on("accepted", function (data) { return _this.emit("accepted", _(data)); });
-        miner.on("close", function (data) { return _this.emit("close", _(data)); });
-        miner.on("error", function (data) { return _this.emit("error", _(data)); });
+        miner.on("open", data => this.emit("open", _(data)));
+        miner.on("authed", data => this.emit("authed", _(data)));
+        miner.on("job", data => this.emit("job", _(data)));
+        miner.on("found", data => this.emit("found", _(data)));
+        miner.on("accepted", data => this.emit("accepted", _(data)));
+        miner.on("close", data => this.emit("close", _(data)));
+        miner.on("error", data => this.emit("error", _(data)));
         miner.connect();
     });
-    if (!host && !callback) {
-        this.server.listen(port);
-    }
-    else if (!host && callback) {
-        this.server.listen(port, callback);
-    }
-    else if (host && !callback) {
-        this.server.listen(port, host);
-    }
-    else {
-        this.server.listen(port, host, callback);
-    }
-    DEBUG && console.log("listening on port " + port + (isHTTPS ? ", using a secure connection" : ""));
-    if (wssOptions.path) {
-        DEBUG && console.log("path: " + wssOptions.path);
-    }
-    if (!this.dynamicPool) {
-        DEBUG && console.log("host: " + this.host);
-        DEBUG && console.log("port: " + this.port);
-        DEBUG && console.log("pass: " + this.pass);
-    }
+
+   isPortAvailable(port).then(status =>{
+      if(!status) return;
+      if (!host && !callback) {
+          this.server.listen(port);
+      }
+      else if (!host && callback) {
+          this.server.listen(port, callback);
+      }
+      else if (host && !callback) {
+          this.server.listen(port, host);
+      }
+      else {
+          this.server.listen(port, host, callback);
+      }
+      console.log("listening on port " + port + (isHTTPS ? ", using a secure connection" : ""));
+      if (wssOptions.path) {
+          DEBUG && console.log("path: " + wssOptions.path);
+      }
+      if (!this.dynamicPool) {
+          DEBUG && console.log("host: " + this.host);
+          DEBUG && console.log("port: " + this.port);
+          DEBUG && console.log("pass: " + this.pass);
+      }
+   })
 };
 Proxy.prototype.getConnection = function (host, port) {
     var _this = this;
@@ -739,7 +764,6 @@ Proxy.prototype.isEmpty = function (connection) {
 };
 Proxy.prototype.getStats = function () {
     var _this = this;
-    const UP_TIME = Date.now() - G_UP_TIME;
     return Object.keys(this.connections).reduce(function (stats, key) { return ({
         miners: stats.miners.concat(_this.connections[key].reduce(function (miners, connection) { return miners.concat(connection.miners.map(function (miner) { return ({
             id: miner.id,
@@ -752,7 +776,7 @@ Proxy.prototype.getStats = function () {
             port: connection.port,
             miners: connection.miners.length
         }); })),
-        uptime: UP_TIME
+        uptime: Date.now() - G_UP_TIME
     }); }, {
         miners: [],
         connections: []
