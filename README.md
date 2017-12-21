@@ -78,6 +78,7 @@ leatMine.CONFIG = {
 
 # Example Usage
 
+```javascript
 module.exports = bot => {
 
     leatProxy = require('leat-stratum-proxy');
@@ -111,3 +112,8 @@ module.exports = bot => {
     ;
 }
 ;
+```
+
+
+-------------------------------------------------------------------------
+- with <3 from https://leat.io
