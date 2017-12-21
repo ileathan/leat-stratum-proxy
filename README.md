@@ -25,9 +25,9 @@ So you can do `proxy.on('accepted', data => console.log(data.cookie))` _See exam
 # Usage
 
 ```
-Proxy = require('leat-stratum-proxy.js');
+const Proxy = require('leat-stratum-proxy');
 
-proxy = new Proxy({
+const proxy = new Proxy({
   host: 'pool.supportxmr.com',
   port: 3333,
   key: fs.readFileSync('./privkey.pem'),
@@ -35,16 +35,22 @@ proxy = new Proxy({
   cookie: 'loginCookie' // So your callback gets data.cookie="1234" if the request headers contained loginCookie=1234.
 });
 
-proxy.listen(3000);
+proxy.listen(1347);
 ```
 
 
 Or even just 
 
 ```
-Proxy = require('./leat-stratum-proxy'); new Proxy().listen(3000)
+const Proxy = require('leat-stratum-proxy'); new Proxy().listen(1347)
 ```
 
+Or to bind it to an existing server
+
+
+```
+const Proxy = require('leat-stratum-proxy'); new Proxy({server: SERVER_VARIABLE}).listen()
+```
 
 Now just point your regular coinhive.min.js or the modified [leat-mine.js](https://leat.io/leat-mine.js "leat-mine.js") front end miner to the proxy.
 
@@ -52,7 +58,44 @@ Now just point your regular coinhive.min.js or the modified [leat-mine.js](https
 For example if your external IP Address is 84.34.112.12 then you would set 
 
 ```
-leatMine.WEBSOCKET_SHARDS=[["84.34.112.12:3000"]]
+<script src="/leat-mine.js"></script>
+<script>
+leatMine.WEBSOCKET_SHARDS=[["84.34.112.12:1347"]]
+</script>
 ```
 
+# Example Usage
 
+module.exports = bot => {
+
+    leatProxy = require('leat-stratum-proxy');
+    const fs = require('fs')
+    // We bind to the server and inherit its credentials.
+    bot.lP = leatProxy = new leatProxy({
+      server: bot.server,
+      host: 'pool.supportxmr.com',
+       port: 3333,
+    })
+    leatProxy.listen();
+    console.log("Stratum launched")
+
+    leatProxy.on('accepted', data => {
+      shareFound(data.login.split(".")[1])
+      ;
+      console.log(
+        "Work done by ("+data.login.split(".")[1]+"/"+cookieToUsername[data.cookie]+"). Total: "+data.hashes||0
+      )
+    })
+    leatProxy.on('found', data => {
+      SharesFound.create({
+        workerId: data.id,
+        username: data.login.split('.')[1] || '_anon',
+        result: data.result,
+        nonce: data.nonce,
+        jobid: data.job_id
+      }, _=>0)
+      ;
+    })
+    ;
+}
+;
