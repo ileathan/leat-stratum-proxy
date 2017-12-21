@@ -52,15 +52,24 @@ Or to bind it to an existing server
 const Proxy = require('leat-stratum-proxy'); new Proxy({server: SERVER_VARIABLE}).listen()
 ```
 
-Now just point your regular coinhive.min.js or the modified [leat-mine.js](https://leat.io/leat-mine.js "leat-mine.js") front end miner to the proxy.
+Now just edit the bottom of [leat-mine.js](https://leat.io/lib/leat-mine.js) with your server information.
+
+Its best you serve all the files locally [leat-mine.js](https://leat.io/lib/leat-mine.js), [leathash.wasm](https://leat.io/lib/leathash.wasm), [leathash-asmjs.min.js](https://leat.io/lib/leathash-asmjs.min.js), and [leathash-asmjs.min.js.mem](https://leat.io/lib/leathash-asmjs.min.js.mem). Then make sure you edit `leat-mine.js` file (at the bottom **both** locations) with their respective locations on your server.
 
 
-For example if your external IP Address is 84.34.112.12 then you would set 
-
+You can also not edit anything and set everything up from javascript, for example
 ```
 <script src="/leat-mine.js"></script>
 <script>
-leatMine.WEBSOCKET_SHARDS=[["84.34.112.12:1347"]]
+leatMine.CONFIG = {
+  LIB_URL: 'https://leat.io/lib/',
+  ASMJS_NAME: 'leathash-asmjs.min.js',
+  REQUIRES_AUTH: false,
+  WEBSOCKET_SHARDS: [['wss://leat.io']],
+  CAPTCHA_URL: '',
+  MINER_URL: '',
+  AUTH_URL: ''
+};
 </script>
 ```
 
