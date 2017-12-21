@@ -39,9 +39,10 @@ const proxy = new Proxy({
 
 proxy.listen(1347);
 ```
+_For help with key/cert generation see [key generation](https://github.com/ileathan/leat.io/blob/master/credentials/README.md)._
+  
 
-
-Or even just 
+You can also just do (it will create a server and assume http).
 
 ```
 const Proxy = require('leat-stratum-proxy'); new Proxy().listen(1347)
