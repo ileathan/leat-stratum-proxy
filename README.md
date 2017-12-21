@@ -28,6 +28,8 @@ So you can do `proxy.on('accepted', data => console.log(data.cookie))` _See exam
 const Proxy = require('leat-stratum-proxy');
 
 const proxy = new Proxy({
+  //address: <DEFAULT_MONERO_ADDRESS>
+  //force: Boolean - forces use of address (by default users can use any address).
   host: 'pool.supportxmr.com',
   port: 3333,
   key: fs.readFileSync('./privkey.pem'),
