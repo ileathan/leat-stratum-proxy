@@ -26,7 +26,6 @@ function Queue(ms) {
     this.events = [];
     this.interval = null;
     this.bypassed = false;
-    this.ms = 100;
     this.ms = ms;
     return this;
 }
