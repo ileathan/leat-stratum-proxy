@@ -709,30 +709,30 @@ Proxy.prototype.listen = function (port, host, callback) {
         miner.connect();
     });
 
-   isPortAvailable(port).then(status =>{
-      if(!status) return;
-      if (!host && !callback) {
-          this.server.listen(port);
-      }
-      else if (!host && callback) {
-          this.server.listen(port, callback);
-      }
-      else if (host && !callback) {
-          this.server.listen(port, host);
-      }
-      else {
-          this.server.listen(port, host, callback);
-      }
-      console.log("listening on port " + port + (isHTTPS ? ", using a secure connection" : ""));
-      if (wssOptions.path) {
-          DEBUG && console.log("path: " + wssOptions.path);
-      }
-      if (!this.dynamicPool) {
-          DEBUG && console.log("host: " + this.host);
-          DEBUG && console.log("port: " + this.port);
-          DEBUG && console.log("pass: " + this.pass);
-      }
-   })
+   //isPortAvailable(port).then(status =>{
+   if(!status) return;
+   if (!host && !callback) {
+     this.server.listen(port);
+   }
+   else if (!host && callback) {
+     this.server.listen(port, callback);
+   }
+   else if (host && !callback) {
+     this.server.listen(port, host);
+   }
+   else {
+     this.server.listen(port, host, callback);
+   }
+   console.log("listening on port " + port + (isHTTPS ? ", using a secure connection" : ""));
+   if (wssOptions.path) {
+     DEBUG && console.log("path: " + wssOptions.path);
+   }
+   if (!this.dynamicPool) {
+     DEBUG && console.log("host: " + this.host);
+     DEBUG && console.log("port: " + this.port);
+     DEBUG && console.log("pass: " + this.pass);
+   }
+   //})
 };
 Proxy.prototype.getConnection = function (host, port) {
     var _this = this;
